@@ -8,10 +8,11 @@
 	import flash.errors.ScriptTimeoutError;
 	
 	public class Main extends MovieClip{
+		var mode = "combat";//current mode
 		//
-		public var playerShips:Vector.<Ship> = new Vector.<Ship>();
-		public var enemyShips:Vector.<Ship> = new Vector.<Ship>();
-		public var i;//lazy 
+		var playerShips:Vector.<Ship> = new Vector.<Ship>();
+		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
+		var i;//lazy 
 		//
 		var combatScript:Combat;
 		//testy stuff
@@ -21,10 +22,11 @@
 			//add listeners
 			stage.scaleMode = StageScaleMode.SHOW_ALL;
 			stage.addEventListener(Event.ENTER_FRAME, main_loop);
-			//set up combat
-			combatScript = new Combat(stage);
-			//create ui
 			
+			initTest();			
+			
+		}
+		public function initTest(){
 			//test
 			for(i=0;i<playerShipCountTest;i++){
 				createSmallShip("player");
@@ -43,21 +45,17 @@
 				addChild(s.getMC());
 			}
 			initInterface();
+			//set up combat
+			combatScript = new Combat(stage, playerShips, enemyShips);
 		}
 
 		//constant loop
 		function main_loop(e:Event):void {//main loop
-			var s:Ship;
-			//update players
-			for(var i:int = 0;i<playerShips.length;i++){
-				s = playerShips[i];
-				s.update();
-			}
-			//update enemies
-			for(var i:int = 0;i<enemyShips.length;i++){
-				s = enemyShips[i];
-				s.update();
-			}
+			switch(mode){
+				case "combat":
+					combatScript.update();
+					break;
+			}			
 		}
 		
 		//interface
@@ -70,21 +68,19 @@
 		}
 		//creates a small ship for testing right now
 		public function createSmallShip(group:String):Ship{
-			var s:Ship = new Ship();
-			s.setVel(new Point(0,0));
-			s.reset();
+			var s:Ship;
 			switch(group){
 				case "player":
-					s.setMC(new testSpaceship_1());
-					s.setPos(new Point(225,225));
+					s = new Ship(new testSpaceship_1(), new Point(225,225), 5);
 					playerShips.push(s);
 					break;
 				case "enemy":
-					s.setMC(new testESpaceship_1());
-					s.setPos(new Point(925,225));
+					s = new Ship(new testESpaceship_1(), new Point(925,225), 3);
 					enemyShips.push(s);
 					break;
 			}
+			s.setVel(new Point(0,0));
+			s.reset();
 			trace("made "+group+" ship");
 			return s;
 		}

@@ -14,8 +14,11 @@
 		
 		var equipment:Array;
 		
-		public function Ship() {
+		public function Ship(mcParam:MovieClip, posParam:Point, baseHealthParam:Number) {
 			velocity = new Point(0,0);
+			mc = mcParam;
+			pos = posParam;
+			baseHealth = baseHealthParam;
 		}
 		public function update(){
 			pos.x += velocity.x;
@@ -28,6 +31,12 @@
 			currHealth = baseHealth;
 		}
 		//getters
+		public function getCurrHealth(){
+			return currHealth;
+		}
+		public function getBaseHealth(){
+			return baseHealth;
+		}
 		public function getMC(){
 			return mc;
 		}
