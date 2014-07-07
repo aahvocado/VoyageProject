@@ -13,7 +13,6 @@
 		//
 		var playerShips:Vector.<Ship> = new Vector.<Ship>();
 		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
-		var i;//lazy 
 		//
 		var combatScript:Combat;
 		//testy stuff
@@ -28,6 +27,7 @@
 			initTest();			
 		}
 		public function initTest(){
+			var i:int;
 			//test
 			for(i=0;i<playerShipCountTest;i++){
 				createSmallShip("player");

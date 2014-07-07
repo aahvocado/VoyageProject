@@ -13,13 +13,15 @@
 		//
 		var playerShips:Vector.<Ship> = new Vector.<Ship>();
 		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
-		var i;//lazy 
 		var effectsList:Array = new Array();
 		//
 		var activeShipUI:MovieClip;
 		var targetingReticle:MovieClip = new TargetingReticle_1();
 		var activeShipReticle:SelectionReticle_1 = new SelectionReticle_1();
 		var activeShip:int = -1;
+		
+		var combatPause:int = 0;
+		var defaultCombatPause:int = 20;
 		
 		var enemySelected:Ship = null;
 		//constructor
@@ -56,10 +58,16 @@
 					resolveTurn();
 					break;
 				case "animating":
+					if(combatPause > 0){
+						combatPause --;
+					}else if(combatPause == 0){
+						trace("done animating");
+						combatMode = "player selection";
+					}
 					animationUpdate();
 					break;
 			}
-			
+			var i:int;
 			var s:Ship;
 			//update players
 			for(i = 0;i<playerShips.length;i++){
@@ -78,7 +86,9 @@
 		//after player is done and all targets are made
 		public function resolveTurn(){
 			trace("resolving turn");
+			combatPause = defaultCombatPause;
 			var s:Ship;
+			var i:int;
 			//update players
 			for(i = 0;i<playerShips.length;i++){
 				s = playerShips[i];
@@ -93,22 +103,25 @@
 			}
 			trace("turn resolution over");
 			initUI();
-			combatMode = "player selection";
+			combatMode = "animating";
 		}
 		//pick the current weapon type and create it
 		function animateWeapon(s:Ship){
 			var a;
 			switch (s.getWeapon().getName()){
 				case "laser beam":
-					a = new Projectile(s.getPos(), s.getTarget().getPos(), 60);//
-					Main.stage.addChild(a.getMC());
-					effectsList.push(a);
+					for(var i:int;i<s.getWeapon().getShots();i++){
+						a = new Projectile(s.getPos(), s.getTarget().getPos(), 60);//
+						a.setWait(i*a.getFireInterval()+VoyageFunctions.randomRange(0,7));
+						Main.stage.addChild(a.getMC());
+						effectsList.push(a);
+					}
 					break;
 			}
 		}
 		//animate stuff
 		function animationUpdate():void{
-			for(i=0;i<effectsList.length;i++){
+			for(var i=0;i<effectsList.length;i++){
 				var e;
 				e = effectsList[i];
 				e.update();
@@ -119,6 +132,7 @@
 					break;
 				}
 			}
+
 		}
 		//player's turn where they select their weapons and targets
 		public function playerSelecting(){
@@ -137,7 +151,7 @@
 		}
 		//weird ai to select targets for the enemy
 		public function enemySelecting(){
-			for(i = 0;i<enemyShips.length;i++){
+			for(var i = 0;i<enemyShips.length;i++){
 				var s:Ship = enemyShips[i];
 				if(!s.hasTarget()){
 					s.setTarget(playerShips[0]);
@@ -149,12 +163,14 @@
 		//select an enemy ship
 		public function selectEnemyShip(e:MouseEvent){
 			var s:Ship;
-			for(var i:int = 0;i<enemyShips.length;i++){
-				s = enemyShips[i];
-				if(e.currentTarget == s.getMC()){
-					enemySelected = s;
-					trace("targeted enemy ");
-					//return s;
+			if(combatMode == "player selection"){
+				for(var i:int = 0;i<enemyShips.length;i++){
+					s = enemyShips[i];
+					if(e.currentTarget == s.getMC()){
+						enemySelected = s;
+						trace("targeted enemy ");
+						//return s;
+					}
 				}
 			}
 			//return null;
@@ -194,6 +210,7 @@
 			}
 			debugUI = new MovieClip();
 			var s:Ship;
+			var i:int;
 			//basic debug text
 			//--player
 			var playerHealthDisplay:TextField = VoyageFunctions.createCustomTextField(50, 10, 220, 350);
@@ -223,7 +240,7 @@
 		//getters
 		//--checks if all ships have made their target and can fire
 		public function allShipsReady():Boolean{
-			for(i=0;i<playerShips.length;i++){
+			for(var i=0;i<playerShips.length;i++){
 				var s:Ship = playerShips[i];
 				if(!s.isActive() && s.hasTarget()){
 					

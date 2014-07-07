@@ -2,6 +2,7 @@
 	
 	public class Weapon {
 		var weaponName;
+		var shots:int;
 		
 		var baseCooldown:int;
 		var currCooldown:int;
@@ -14,6 +15,7 @@
 				case "laser beam":
 					baseCooldown = 1;
 					basePower = 1;
+					shots = 3;
 					break;
 			}
 		}
@@ -27,6 +29,9 @@
 		}
 		
 		//getters
+		public function getShots():int{
+			return shots;
+		}
 		public function getPower():int{
 			return basePower;
 		}
