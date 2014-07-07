@@ -6,7 +6,7 @@
 	import flash.utils.*;
 	import flash.sampler.Sample;
 	import flash.errors.ScriptTimeoutError;
-	
+
 	public class Main extends MovieClip{
 		var mode = "combat";//current mode
 		//
@@ -71,14 +71,15 @@
 			var s:Ship;
 			switch(group){
 				case "player":
-					s = new Ship(new testSpaceship_1(), new Point(225,225), 5);
+					s = new Ship(new testSpaceship_1(), new Point(225+VoyageFunctions.randomRange(-50,50),225+VoyageFunctions.randomRange(-150,150)), 5);
 					playerShips.push(s);
 					break;
 				case "enemy":
-					s = new Ship(new testESpaceship_1(), new Point(925,225), 3);
+					s = new Ship(new testESpaceship_1(), new Point(925+VoyageFunctions.randomRange(-50,50),225+VoyageFunctions.randomRange(-150,150)), 3);
 					enemyShips.push(s);
 					break;
 			}
+			//s.giveWeapon("laser beam");
 			s.setVel(new Point(0,0));
 			s.reset();
 			trace("made "+group+" ship");
