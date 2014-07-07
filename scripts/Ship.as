@@ -43,9 +43,20 @@
 		}
 		public function takeTurn(){
 			target.takeDamage(currWeapon.getPower());
+			animateWeapon();
 			//
 			target = null;
 			active = true;
+		}
+		function animateWeapon(){
+			var a;
+			a = new damage_effect_small();
+			switch (currWeapon.getName()){
+				case "laser beam":
+					a = new Projectile(pos, target.getPos(), 10);//
+					Main.stage.addChild(a.getMC());
+					break;
+			}
 		}
 		public function takeDamage(damage:int){
 			currHealth = currHealth - damage;

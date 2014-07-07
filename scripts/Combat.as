@@ -1,11 +1,12 @@
 ﻿package scripts {
 	import flash.text.TextField;
+	import Main;
 	import scripts.VoyageFunctions;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 
 	public class Combat {
-		var mainStage;//pass in the stage
+		//var Main.stage;//pass in the stage
 		var combatMode:String;//is it the player's turn to pause it
 		//
 		var debugUI:MovieClip;
@@ -13,15 +14,17 @@
 		var playerShips:Vector.<Ship> = new Vector.<Ship>();
 		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
 		var i;//lazy 
+		var effectList:Array = new Array();
 		//
 		var activeShipUI:MovieClip;
+		var targetingReticle:MovieClip = new TargetingReticle_1();
 		var activeShipReticle:SelectionReticle_1 = new SelectionReticle_1();
 		var activeShip:int = -1;
 		
 		var enemySelected:Ship = null;
 		//constructor
 		public function Combat(stageThing, playerGroup:Vector.<Ship>, enemyGroup:Vector.<Ship>) {
-			mainStage = stageThing;//main stage
+			Main.stage = stageThing;//main stage
 			playerShips = playerGroup;
 			enemyShips = enemyGroup;
 			combatMode = "player selection";
@@ -37,7 +40,7 @@
 				s = enemyShips[i];
 				s.setCombatNum(i);
 				s.getMC().addEventListener(MouseEvent.CLICK, selectEnemyShip);
-				s.getMC().addEventListener(MouseEvent.CLICK, selectEnemyShip);
+				s.getMC().addEventListener(MouseEvent.MOUSE_OVER, rolloverEnemyShip);
 			}
 			switchToShip(activeShip);
 		}
@@ -45,11 +48,15 @@
 		public function update(){
 			switch (combatMode){
 				case "player selection":
+					animationUpdate();
 					playerSelecting();
 					enemySelecting();
 					break;
 				case "resolve turn":
 					resolveTurn();
+					break;
+				case "animating":
+					animationUpdate();
 					break;
 			}
 			
@@ -76,6 +83,7 @@
 			for(i = 0;i<playerShips.length;i++){
 				s = playerShips[i];
 				s.takeTurn();
+				effectList
 			}
 			//update enemies
 			for(i = 0;i<enemyShips.length;i++){
@@ -111,6 +119,10 @@
 				}
 			}
 		}
+		//animate stuff
+		function animationUpdate():void{
+			
+		}
 		//select an enemy ship
 		public function selectEnemyShip(e:MouseEvent){
 			var s:Ship;
@@ -124,6 +136,12 @@
 			}
 			//return null;
 		}
+		//
+		public function rolloverEnemyShip(e:MouseEvent){
+			targetingReticle.alpha = 1;
+			targetingReticle.x = e.currentTarget.x;
+			targetingReticle.y = e.currentTarget.y;
+		}
 		public function updateUI(){
 			var s:Ship;
 			if(activeShip > -1){
@@ -134,11 +152,11 @@
 		}
 		public function switchToShip(shipNumber){
 			if(activeShipUI != null){
-				mainStage.removeChild(activeShipUI);
+				Main.stage.removeChild(activeShipUI);
 			}
 			activeShipUI = new MovieClip();
 			drawShipCombatBar();
-			mainStage.addChild(activeShipUI);
+			Main.stage.addChild(activeShipUI);
 		}
 		public function drawShipCombatBar(){
 			var s:Ship = playerShips[activeShip];
@@ -149,7 +167,7 @@
 		//initialize the combat ui
 		public function initUI(){
 			if(debugUI != null){
-				mainStage.removeChild(debugUI);
+				Main.stage.removeChild(debugUI);
 			}
 			debugUI = new MovieClip();
 			var s:Ship;
@@ -173,9 +191,11 @@
 			
 			debugUI.addChild(playerHealthDisplay);
 			debugUI.addChild(enemyHealthDisplay);
-			mainStage.addChild(debugUI);
+			Main.stage.addChild(debugUI);
 			//active ship selector
-			mainStage.addChild(activeShipReticle);
+			targetingReticle.alpha = 0;
+			Main.stage.addChild(targetingReticle);
+			Main.stage.addChild(activeShipReticle);
 		}
 		//getters
 		//--checks if all ships have made their target and can fire

@@ -9,6 +9,7 @@
 
 	public class Main extends MovieClip{
 		var mode = "combat";//current mode
+		public static var stage:Stage;
 		//
 		var playerShips:Vector.<Ship> = new Vector.<Ship>();
 		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
@@ -19,12 +20,12 @@
 		var playerShipCountTest = 1;
 		//main constructor
 		public function Main(){
+			Main.stage = stage;
 			//add listeners
 			stage.scaleMode = StageScaleMode.SHOW_ALL;
 			stage.addEventListener(Event.ENTER_FRAME, main_loop);
 			
 			initTest();			
-			
 		}
 		public function initTest(){
 			//test
@@ -57,9 +58,11 @@
 					break;
 			}			
 		}
-		
+		//aaa
+		//public static function addProjectile():Projectile{
+			
+		//}
 		//interface
-		
 		public function initInterface(){
 			var shipSymb = new test_ship_symbol();
 			shipSymb.x = 90;

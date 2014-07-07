@@ -6,7 +6,6 @@
 		public function VoyageFunctions() {
 			// constructor code
 		}
-		
 		//picks a random number in this range
 		public static function randomRange(minNum:Number, maxNum:Number):Number {
 			return (Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum);
