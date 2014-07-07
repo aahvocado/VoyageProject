@@ -43,21 +43,12 @@
 		}
 		public function takeTurn(){
 			target.takeDamage(currWeapon.getPower());
-			animateWeapon();
+			//animateWeapon();
 			//
 			target = null;
 			active = true;
 		}
-		function animateWeapon(){
-			var a;
-			a = new damage_effect_small();
-			switch (currWeapon.getName()){
-				case "laser beam":
-					a = new Projectile(pos, target.getPos(), 10);//
-					Main.stage.addChild(a.getMC());
-					break;
-			}
-		}
+		
 		public function takeDamage(damage:int){
 			currHealth = currHealth - damage;
 			trace("- taking "+damage+" damage");
@@ -77,6 +68,12 @@
 			weapons.push(newWeap);
 		}
 		//getters
+		public function getTarget():Ship{
+			return target;
+		}
+		public function getWeapon():Weapon{
+			return currWeapon;
+		}
 		public function hasTarget():Boolean{
 			if(target != null){
 				return true;

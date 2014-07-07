@@ -14,7 +14,7 @@
 		var playerShips:Vector.<Ship> = new Vector.<Ship>();
 		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
 		var i;//lazy 
-		var effectList:Array = new Array();
+		var effectsList:Array = new Array();
 		//
 		var activeShipUI:MovieClip;
 		var targetingReticle:MovieClip = new TargetingReticle_1();
@@ -82,17 +82,43 @@
 			//update players
 			for(i = 0;i<playerShips.length;i++){
 				s = playerShips[i];
+				animateWeapon(s);
 				s.takeTurn();
-				effectList
 			}
 			//update enemies
 			for(i = 0;i<enemyShips.length;i++){
 				s = enemyShips[i];
+				animateWeapon(s);
 				s.takeTurn();
 			}
 			trace("turn resolution over");
 			initUI();
 			combatMode = "player selection";
+		}
+		//pick the current weapon type and create it
+		function animateWeapon(s:Ship){
+			var a;
+			switch (s.getWeapon().getName()){
+				case "laser beam":
+					a = new Projectile(s.getPos(), s.getTarget().getPos(), 60);//
+					Main.stage.addChild(a.getMC());
+					effectsList.push(a);
+					break;
+			}
+		}
+		//animate stuff
+		function animationUpdate():void{
+			for(i=0;i<effectsList.length;i++){
+				var e;
+				e = effectsList[i];
+				e.update();
+				if(e.isDead()){
+					Main.stage.removeChild(e.getMC());
+					effectsList.splice(i,1);
+					animationUpdate();
+					break;
+				}
+			}
 		}
 		//player's turn where they select their weapons and targets
 		public function playerSelecting(){
@@ -119,10 +145,7 @@
 				}
 			}
 		}
-		//animate stuff
-		function animationUpdate():void{
-			
-		}
+
 		//select an enemy ship
 		public function selectEnemyShip(e:MouseEvent){
 			var s:Ship;
