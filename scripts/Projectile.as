@@ -20,6 +20,7 @@
 		
 		public function Projectile(o:Point, d:Point, spd:Number) {
 			mc = new laser_beam_projectile();
+			mc.alpha = 0;
 			life = 0;
 			maxLife = 100;
 			wait = 0;
@@ -30,7 +31,7 @@
 			speed = spd;
 			velocity = new Point(0,0);
 			
-			var spread = 15;
+			var spread = 25;
 			destination.x = destination.x + VoyageFunctions.randomRange(-spread,spread);//give some variance
 			destination.y = destination.y + VoyageFunctions.randomRange(-spread,spread);
 			//trace(destination + "//" + d);

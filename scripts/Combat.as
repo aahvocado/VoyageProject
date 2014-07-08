@@ -4,19 +4,23 @@
 	import scripts.VoyageFunctions;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
+	import flash.filters.*;
+	import flash.events.Event;
 
 	public class Combat {
 		//var Main.stage;//pass in the stage
 		var combatMode:String;//is it the player's turn to pause it
-		//
 		var debugUI:MovieClip;
+		//var combatBarUI:MovieClip;
 		//
 		var playerShips:Vector.<Ship> = new Vector.<Ship>();
 		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
 		var effectsList:Array = new Array();
 		//
-		var activeShipUI:MovieClip;
-		var targetingReticle:MovieClip = new TargetingReticle_1();
+		var activeShipUI:MovieClip;//ship ui holder movieclip
+		var skillButtonFunctions:Array;//holds the function for the current skill buttons
+		var targetingReticle:MovieClip = new TargetingReticle_1();//targeting reticle movieclip
 		var activeShipReticle:SelectionReticle_1 = new SelectionReticle_1();
 		var activeShip:int = -1;
 		
@@ -92,6 +96,7 @@
 			//update players
 			for(i = 0;i<playerShips.length;i++){
 				s = playerShips[i];
+				trace("- player using "+s.getCurrWeapon().getName());
 				animateWeapon(s);
 				s.takeTurn();
 			}
@@ -107,16 +112,22 @@
 		}
 		//pick the current weapon type and create it
 		function animateWeapon(s:Ship){
-			var a;
-			switch (s.getWeapon().getName()){
+			switch (s.getCurrWeapon().getName()){
 				case "laser beam":
-					for(var i:int;i<s.getWeapon().getShots();i++){
-						a = new Projectile(s.getPos(), s.getTarget().getPos(), 60);//
-						a.setWait(i*a.getFireInterval()+VoyageFunctions.randomRange(0,7));
-						Main.stage.addChild(a.getMC());
-						effectsList.push(a);
-					}
+					laserBeam(s.getPos(), s.getTarget().getPos(), s.getCurrWeapon());
 					break;
+				case "laser beam II":
+					laserBeam(s.getPos(), s.getTarget().getPos(), s.getCurrWeapon());
+					break;
+			}
+		}
+		function laserBeam(origin:Point, destination:Point, w:Weapon){
+			var a;
+			for(var i:int;i<w.getShots();i++){
+				a = new Projectile(origin, destination, 60);//
+				a.setWait(i*a.getFireInterval()+VoyageFunctions.randomRange(0,7));
+				Main.stage.addChild(a.getMC());
+				effectsList.push(a);
 			}
 		}
 		//animate stuff
@@ -168,7 +179,7 @@
 					s = enemyShips[i];
 					if(e.currentTarget == s.getMC()){
 						enemySelected = s;
-						trace("targeted enemy ");
+						trace("- targeted enemy ");
 						//return s;
 					}
 				}
@@ -187,6 +198,7 @@
 				s = playerShips[activeShip];
 				activeShipReticle.x = s.getPos().x;
 				activeShipReticle.y = s.getPos().y;
+				activeShipReticle.filters = [VoyageFunctions.skillGlow(0x3AD4E2)];
 			}
 		}
 		public function switchToShip(shipNumber){
@@ -194,14 +206,54 @@
 				Main.stage.removeChild(activeShipUI);
 			}
 			activeShipUI = new MovieClip();
+			activeShipUI.x = 0; 
+			activeShipUI.y = 0;
 			drawShipCombatBar();
 			Main.stage.addChild(activeShipUI);
 		}
 		public function drawShipCombatBar(){
+			trace("drawing combat bar");
+			var i:int;
 			var s:Ship = playerShips[activeShip];
 			var currShipDisplay:TextField = VoyageFunctions.createCustomTextField(40, 600, 220, 350);
 			currShipDisplay.text = " Ship " + " ||| hp: "+s.getCurrHealth()+"/"+s.getBaseHealth()+"\n";
 			activeShipUI.addChild(currShipDisplay);
+			//draw skill icons
+			var pos = new Point(280, 675);
+			skillButtonFunctions = new Array(s.getWeaponList().length);
+							
+
+			for(i=0;i<s.getWeaponList().length;i++){
+				var newpos:Point = new Point((pos.x + i*195), pos.y);
+				var w:Weapon = s.getWeaponList()[i];
+				var skillButton:MovieClip = new skill_icon();
+				skillButton.x = newpos.x;
+				skillButton.y = newpos.y;
+				var glowFilter:BitmapFilter = VoyageFunctions.skillGlow(0x4FE23A);
+				if(s.getWeaponNum() == i){
+					skillButton.filters = [glowFilter];
+				}
+				skillButton.num = i;
+				skillButton.addEventListener(MouseEvent.CLICK, selectSkill);
+						/*skillButton.addEventListener("click", 
+													function(){
+														trace(this);
+														selectSkill(this.num);
+													},
+											false);*/
+				activeShipUI.addChild(skillButton);
+				//
+				var powerText:TextField = VoyageFunctions.createTechnoTextField(newpos.x-175/2, newpos.y-65, 175, 75);
+				powerText.text = w.getPower()+"";
+				activeShipUI.addChild(powerText);
+			}
+		}
+		public function selectSkill(e:MouseEvent){//num:int
+			trace("selected skill "+ e.currentTarget.num);
+			var s:Ship = playerShips[activeShip];
+			s.setCurrentWeaponNum(e.currentTarget.num);
+			trace(s.getCurrWeapon().getName());
+			switchToShip(activeShip);
 		}
 		//initialize the combat ui
 		public function initUI(){

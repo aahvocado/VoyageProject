@@ -82,7 +82,7 @@
 					enemyShips.push(s);
 					break;
 			}
-			//s.giveWeapon("laser beam");
+			
 			s.setVel(new Point(0,0));
 			s.reset();
 			trace("made "+group+" ship");

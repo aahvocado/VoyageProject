@@ -22,7 +22,8 @@
 		//combat
 		var combatNum:int;//number in the array for this combat
 		var target:Ship;//ship this one will shoot at
-		var currWeapon:Weapon;
+		//var currWeapon:Weapon;
+		var currWeaponNum:int;
 		
 		public function Ship(mcParam:MovieClip, posParam:Point, baseHealthParam:Number) {
 			velocity = new Point(0,0);
@@ -30,7 +31,7 @@
 			pos = posParam;
 			baseHealth = baseHealthParam;
 			reset();
-			//
+			currWeaponNum = 0;
 		}
 		public function update(){
 			pos.x += velocity.x;
@@ -39,10 +40,10 @@
 			mc.x = pos.x;
 			mc.y = pos.y;
 			
-			currWeapon = weapons[0];
 		}
 		public function takeTurn(){
-			target.takeDamage(currWeapon.getPower());
+			trace("-- current weapon is "+currWeaponNum);
+			target.takeDamage(getCurrWeapon().getPower());
 			//animateWeapon();
 			//
 			target = null;
@@ -59,20 +60,28 @@
 			currHealth = baseHealth;
 			active = true;
 			//give everyone a laser
-			var newWeap = new Weapon("laser beam");
-			weapons.push(newWeap);
+			giveWeapon("laser beam");
+			giveWeapon("laser beam II");
+			giveWeapon("laser beam II");
 		}
 		//give this ship a weapon
 		public function giveWeapon(weaponName:String){
 			var newWeap = new Weapon(weaponName);
 			weapons.push(newWeap);
+			//trace("--giving "+weaponName);
 		}
 		//getters
 		public function getTarget():Ship{
 			return target;
 		}
-		public function getWeapon():Weapon{
-			return currWeapon;
+		public function getCurrWeapon():Weapon{
+			return weapons[currWeaponNum];
+		}
+		public function getWeaponNum():int{
+			return currWeaponNum;
+		}
+		public function getWeaponList():Vector.<Weapon>{
+			return weapons;
 		}
 		public function hasTarget():Boolean{
 			if(target != null){
@@ -96,6 +105,9 @@
 			return pos;
 		}
 		//setters
+		public function setCurrentWeaponNum(num:int){
+			currWeaponNum = num;
+		}
 		public function setTarget(t:Ship){
 			target = t;
 		}

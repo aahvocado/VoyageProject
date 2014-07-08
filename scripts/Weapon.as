@@ -13,9 +13,14 @@
 			weaponName = weaponNameParam;
 			switch(weaponName){
 				case "laser beam":
-					baseCooldown = 1;
+					baseCooldown = 0;
 					basePower = 1;
 					shots = 3;
+					break;
+				case "laser beam II":
+					baseCooldown = 1;
+					basePower = 2;
+					shots = 4;
 					break;
 			}
 		}
