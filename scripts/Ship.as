@@ -41,18 +41,30 @@
 			mc.y = pos.y;
 			
 		}
+		//execute this ship's turn
 		public function takeTurn(){
-			trace("-- current weapon is "+currWeaponNum);
-			target.takeDamage(getCurrWeapon().getPower());
-			//animateWeapon();
-			//
+			//trace("-- current weapon is "+currWeaponNum);
+			if(getCurrWeapon().isUseable()){
+				target.takeDamage(getCurrWeapon().getPower());
+				cooldownAllWeapons();
+				getCurrWeapon().goOnCooldown();
+				//trace("TEST "+getCurrWeapon().getCooldownString());
+			}else{
+				trace("---error: should not be able to use this weapon");
+			}
 			target = null;
 			active = true;
 		}
-		
+		//take damage
 		public function takeDamage(damage:int){
 			currHealth = currHealth - damage;
 			trace("- taking "+damage+" damage");
+		}
+		//lower the cooldown on all weapons by one
+		public function cooldownAllWeapons(){
+			for(var i=0;i<weapons.length;i++){
+				weapons[i].cooldown();
+			}
 		}
 		//
 		public function reset(){

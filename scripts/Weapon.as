@@ -22,7 +22,15 @@
 					basePower = 2;
 					shots = 4;
 					break;
+				case "laser beam III":
+					baseCooldown = 2;
+					basePower = 3;
+					shots = 5;
+					break;
 			}
+		}
+		public function goOnCooldown(){
+			currCooldown = baseCooldown;
 		}
 		public function cooldown(){
 			if(currCooldown > 0){
@@ -34,6 +42,12 @@
 		}
 		
 		//getters
+		public function getCurrCooldown():int{
+			return currCooldown;
+		}
+		public function getCooldownString():String{
+			return ""+currCooldown +"/"+baseCooldown;
+		}
 		public function getShots():int{
 			return shots;
 		}

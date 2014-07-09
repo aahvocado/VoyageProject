@@ -99,14 +99,24 @@
 				trace("- player using "+s.getCurrWeapon().getName());
 				animateWeapon(s);
 				s.takeTurn();
+				//change selected skill to something useable
+				if(!s.getCurrWeapon().isUseable()){
+					s.setCurrentWeaponNum(0);
+					drawShipCombatBar();
+				}
 			}
 			//update enemies
 			for(i = 0;i<enemyShips.length;i++){
 				s = enemyShips[i];
 				animateWeapon(s);
 				s.takeTurn();
+				//change selected skill to something useable
+				if(!s.getCurrWeapon().isUseable()){
+					s.setCurrentWeaponNum(0);
+				}
 			}
-			trace("turn resolution over");
+
+			trace("turn resolution over ");
 			initUI();
 			combatMode = "animating";
 		}
@@ -221,7 +231,6 @@
 			//draw skill icons
 			var pos = new Point(280, 675);
 			skillButtonFunctions = new Array(s.getWeaponList().length);
-							
 
 			for(i=0;i<s.getWeaponList().length;i++){
 				var newpos:Point = new Point((pos.x + i*195), pos.y);
@@ -234,6 +243,7 @@
 					skillButton.filters = [glowFilter];
 				}
 				skillButton.num = i;
+				skillButton.power_txt.text = ""+w.getPower();
 				skillButton.addEventListener(MouseEvent.CLICK, selectSkill);
 						/*skillButton.addEventListener("click", 
 													function(){
@@ -243,17 +253,23 @@
 											false);*/
 				activeShipUI.addChild(skillButton);
 				//
-				var powerText:TextField = VoyageFunctions.createTechnoTextField(newpos.x-175/2, newpos.y-65, 175, 75);
+				
+				/*var powerText:TextField = VoyageFunctions.createTechnoTextField(newpos.x, newpos.y-65, 30, 75);
 				powerText.text = w.getPower()+"";
-				activeShipUI.addChild(powerText);
+				activeShipUI.addChild(powerText);*/
 			}
 		}
 		public function selectSkill(e:MouseEvent){//num:int
-			trace("selected skill "+ e.currentTarget.num);
 			var s:Ship = playerShips[activeShip];
-			s.setCurrentWeaponNum(e.currentTarget.num);
-			trace(s.getCurrWeapon().getName());
-			switchToShip(activeShip);
+			var w:Weapon = s.getWeaponList()[e.currentTarget.num];
+			if(w.isUseable()){
+				trace("- selected skill "+ e.currentTarget.num);
+				s.setCurrentWeaponNum(e.currentTarget.num);
+				trace(s.getCurrWeapon().getName());
+				switchToShip(activeShip);
+			}else{
+				trace("- skill  "+ e.currentTarget.num + " has cooldown "+w.getCooldownString());
+			}
 		}
 		//initialize the combat ui
 		public function initUI(){
@@ -286,7 +302,7 @@
 			Main.stage.addChild(debugUI);
 			//active ship selector
 			targetingReticle.alpha = 0;
-			Main.stage.addChild(targetingReticle);
+			//Main.stage.addChild(targetingReticle);
 			Main.stage.addChild(activeShipReticle);
 		}
 		//getters
