@@ -48,6 +48,9 @@
 		public function getCooldownString():String{
 			return ""+currCooldown +"/"+baseCooldown;
 		}
+		public function getReverseCooldownString():String{
+			return ""+(baseCooldown-currCooldown) +"/"+baseCooldown;
+		}
 		public function getShots():int{
 			return shots;
 		}

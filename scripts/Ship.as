@@ -74,7 +74,7 @@
 			//give everyone a laser
 			giveWeapon("laser beam");
 			giveWeapon("laser beam II");
-			giveWeapon("laser beam II");
+			giveWeapon("laser beam III");
 		}
 		//give this ship a weapon
 		public function giveWeapon(weaponName:String){

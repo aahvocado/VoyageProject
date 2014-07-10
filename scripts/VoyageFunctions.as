@@ -2,18 +2,32 @@
 	import flash.text.*;
 	import flash.filters.*;
 	import fl.motion.Color;
+	import flash.geom.Point;
+	import flash.display.MovieClip;
 
 	public class VoyageFunctions {
-
+		
 		public function VoyageFunctions() {
 			// constructor code
+		}
+		public static function createHitBox(pos:Point, w:Number, h:Number, n:Number):MovieClip{
+			var hb:MovieClip = new hitbox();
+			hb.x = pos.x;
+			hb.y = pos.y;
+			hb.width = w;
+			hb.height = h;
+			hb.num = n;
+			if(Main.debug == false){
+				hb.alpha = 0;
+			}
+			return hb;
 		}
 		//picks a random number in this range
 		public static function randomRange(minNum:Number, maxNum:Number):Number {
 			return (Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum);
 		}
-		public static function skillGlow(c:int):BitmapFilter{
-			return new GlowFilter(c,.5,8,8,3)
+		public static function skillGlow(c:int, size:Number):BitmapFilter{
+			return new GlowFilter(c,.5,size,size,3)
 		}
 		//creates a text field
 		public static function createTechnoTextField(x:Number, y:Number, width:Number, height:Number):TextField {

@@ -6,17 +6,20 @@
 	import flash.utils.*;
 	import flash.sampler.Sample;
 	import flash.errors.ScriptTimeoutError;
+	import flash.display3D.IndexBuffer3D;
 
 	public class Main extends MovieClip{
 		var mode = "combat";//current mode
 		public static var stage:Stage;
+		public static var debug:Boolean = false;
+
 		//
 		var playerShips:Vector.<Ship> = new Vector.<Ship>();
 		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
 		//
 		var combatScript:Combat;
 		//testy stuff
-		var playerShipCountTest = 1;
+		var playerShipCountTest = 2;
 		//main constructor
 		public function Main(){
 			Main.stage = stage;
@@ -40,6 +43,8 @@
 				s = playerShips[i];
 				addChild(s.getMC());
 			}
+
+			//
 			for(i=0;i<enemyShips.length;i++){
 				s = enemyShips[i];
 				s.getMC().scaleX *= -1;
@@ -49,7 +54,7 @@
 			//set up combat
 			combatScript = new Combat(stage, playerShips, enemyShips);
 		}
-
+		
 		//constant loop
 		function main_loop(e:Event):void {//main loop
 			switch(mode){
