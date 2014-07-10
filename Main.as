@@ -19,7 +19,7 @@
 		//
 		var combatScript:Combat;
 		//testy stuff
-		var playerShipCountTest = 2;
+		var playerShipCountTest = 4;
 		//main constructor
 		public function Main(){
 			Main.stage = stage;

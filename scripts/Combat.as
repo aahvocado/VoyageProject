@@ -140,7 +140,8 @@
 			combatMode = "animating";
 		}
 		//pick the current weapon type and create it
-		function animateWeapon(s:Ship){
+		function animateWeapon(s:Ship):void{
+			var anim:MovieClip;
 			switch (s.getCurrWeapon().getName()){
 				case "laser beam":
 					laserBeam(s.getPos(), s.getTarget().getPos(), s.getCurrWeapon());
@@ -153,13 +154,18 @@
 					break;
 			}
 		}
-		function laserBeam(origin:Point, destination:Point, w:Weapon){
+		function laserBeam(origin:Point, destination:Point, w:Weapon):void{
 			var a;
 			for(var i:int;i<w.getShots();i++){
 				a = new Projectile(origin, destination, 60);//
 				a.setWait(i*a.getFireInterval()+VoyageFunctions.randomRange(0,7));
 				Main.stage.addChild(a.getMC());
 				effectsList.push(a);
+				if(w.getName() == "laser beam III"){
+					a.getMC().filters = [VoyageFunctions.skillGlow(0xFF3300,20)];
+				}else{
+					a.getMC().filters = [VoyageFunctions.skillGlow(0xFFCC66,10)];
+				}
 			}
 		}
 		//animate stuff
@@ -187,6 +193,10 @@
 					s.setActive(false);
 					s.setTarget(enemySelected);
 					enemySelected = null;
+					if(!allShipsReady()){
+						nextActiveShip();
+						refreshShipUI();
+					}
 				}
 			}else{
 				trace("--- error: cannon use this weapon!");
@@ -232,10 +242,12 @@
 			targetingReticle.y = e.currentTarget.y;
 			var s:Ship = playerShips[e.currentTarget.num];
 			s.getMC().filters = [VoyageFunctions.skillGlow(0x0000FF,15)];
+			s.selected = true;
 		}
 		public function rolloutPlayerShip(e:MouseEvent){
 			var s:Ship = playerShips[e.currentTarget.num];
-			s.getMC().filters = [];
+			s.getMC().filters = null;
+			s.selected = false
 		}
 		//mouse events on enemy ship
 		public function rolloverEnemyShip(e:MouseEvent){
@@ -244,10 +256,12 @@
 			targetingReticle.y = e.currentTarget.y;
 			var s:Ship = enemyShips[e.currentTarget.num];
 			s.getMC().filters = [VoyageFunctions.skillGlow(0xFF0000,15)];
+			s.selected = true;
 		}
 		public function rolloutEnemyShip(e:MouseEvent){
 			var s:Ship = enemyShips[e.currentTarget.num];
-			s.getMC().filters = [];
+			s.getMC().filters = null;
+			s.selected = false;
 		}
 		//constant checking of certain ui elements
 		public function updateUI(){
@@ -374,6 +388,15 @@
 			Main.stage.addChild(activeShipReticle);
 		}
 		//getters
+		public function nextActiveShip(){
+			activeShip ++;
+			if(activeShip >= playerShips.length){
+				activeShip = 0;
+			}
+			if(!playerShips[activeShip].isActive()){
+				nextActiveShip();
+			}
+		}
 		//--checks if all ships have made their target and can fire
 		public function allShipsReady():Boolean{
 			for(var i=0;i<playerShips.length;i++){

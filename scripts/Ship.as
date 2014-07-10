@@ -10,6 +10,7 @@
 		var size:Number;//size of ship, this determines z position
 		var velocity:Point;
 		var active:Boolean;//is this ship useable
+		public var selected:Boolean;
 		//stats
 		var baseHealth:Number;
 		var currHealth:Number;
@@ -39,7 +40,11 @@
 			
 			mc.x = pos.x;
 			mc.y = pos.y;
-			
+			if(hasTarget() && !selected){
+				mc.filters = [VoyageFunctions.skillGlow(0x00FF00,7)];
+			}else if(!hasTarget() && !selected){
+				mc.filters = null;
+			}
 		}
 		//execute this ship's turn
 		public function takeTurn(){
