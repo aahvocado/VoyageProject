@@ -14,8 +14,8 @@
 		var debugUI:MovieClip;
 		//var combatBarUI:MovieClip;
 		//
-		var playerShips:Vector.<Ship> = new Vector.<Ship>();
-		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
+		var player:Player;
+		var enemy:Player;
 		var playerSelections:Vector.<int> = new Vector.<int>();
 
 		var effectsList:Array = new Array();
@@ -31,28 +31,32 @@
 		
 		var enemySelected:Ship = null;
 		//constructor
-		public function Combat(stageThing, playerGroup:Vector.<Ship>, enemyGroup:Vector.<Ship>) {
+		public function Combat(stageThing, playerGroup:Player, enemyGroup:Player) {
 			Main.stage = stageThing;//main stage
-			playerShips = playerGroup;
-			enemyShips = enemyGroup;
+			player = playerGroup;
+			enemy = enemyGroup;
 			combatMode = "player selection";
 			//
 			initUI();
 			addListeners();
 			//
-			if(playerShips.length > 0){
+			if(player.getShipList().length > 0){
 				activeShip = 0;
 			}
-			
+
 			switchToShip(activeShip);
 		}
+		//add event listener button hitboxes
+		//-- temporarily add ships to the stage here too
 		public function addListeners(){
 			var s:Ship;
 			var i:int;
 			var hb:MovieClip;//hitbox that the player clicks on 
 			//make player clickable
-			for(i = 0;i<playerShips.length;i++){
-				s = playerShips[i];
+			for(i = 0;i<player.getShipList().length;i++){
+				s = player.getShipList()[i];
+				Main.stage.addChild(s.getMC());
+
 				s.setCombatNum(i);
 				hb = VoyageFunctions.createHitBox(s.getPos(), s.getMC().width, s.getMC().height, i);
 				Main.stage.addChild(hb);
@@ -61,8 +65,9 @@
 				hb.addEventListener(MouseEvent.MOUSE_OUT, rolloutPlayerShip);
 			}
 			//check enemies
-			for(i = 0;i<enemyShips.length;i++){
-				s = enemyShips[i];
+			for(i = 0;i<enemy.getShipList().length;i++){
+				s = enemy.getShipList()[i];
+				Main.stage.addChild(s.getMC());
 				s.setCombatNum(i);
 				hb = VoyageFunctions.createHitBox(s.getPos(), s.getMC().width, s.getMC().height, i);
 				Main.stage.addChild(hb);
@@ -95,13 +100,13 @@
 			var i:int;
 			var s:Ship;
 			//update players
-			for(i = 0;i<playerShips.length;i++){
-				s = playerShips[i];
+			for(i = 0;i<player.getShipList().length;i++){
+				s = player.getShipList()[i];
 				s.update();
 			}
 			//update enemies
-			for(i = 0;i<enemyShips.length;i++){
-				s = enemyShips[i];
+			for(i = 0;i<enemy.getShipList().length;i++){
+				s = enemy.getShipList()[i];
 				s.update();
 			}
 			//
@@ -115,8 +120,8 @@
 			var s:Ship;
 			var i:int;
 			//update players
-			for(i = 0;i<playerShips.length;i++){
-				s = playerShips[i];
+			for(i = 0;i<player.getShipList().length;i++){
+				s = player.getShipList()[i];
 				trace("- player using "+s.getCurrWeapon().getName());
 				animateWeapon(s);
 				s.takeTurn();
@@ -126,8 +131,8 @@
 				}
 			}
 			//update enemies
-			for(i = 0;i<enemyShips.length;i++){
-				s = enemyShips[i];
+			for(i = 0;i<enemy.getShipList().length;i++){
+				s = enemy.getShipList()[i];
 				animateWeapon(s);
 				s.takeTurn();
 				//change selected skill to something useable
@@ -187,7 +192,7 @@
 		public function playerSelecting(){
 			var s:Ship;
 			//check for targeting
-			s = playerShips[activeShip];
+			s = player.getShipList()[activeShip];
 			if(s.getCurrWeapon().isUseable()){
 				if(enemySelected != null && s.isActive()){
 					s.setActive(false);
@@ -209,10 +214,10 @@
 		}
 		//weird ai to select targets for the enemy
 		public function enemySelecting(){
-			for(var i = 0;i<enemyShips.length;i++){
-				var s:Ship = enemyShips[i];
+			for(var i = 0;i<enemy.getShipList().length;i++){
+				var s:Ship = enemy.getShipList()[i];
 				if(!s.hasTarget()){
-					s.setTarget(playerShips[0]);
+					s.setTarget(player.getShipList()[0]);
 					s.setActive(false);
 				}
 			}
@@ -223,9 +228,9 @@
 			var s:Ship;
 			if(combatMode == "player selection"){
 				trace("- targeted enemy ");
-				enemySelected = enemyShips[e.currentTarget.num];
-				/*for(var i:int = 0;i<enemyShips.length;i++){
-					s = enemyShips[i];
+				enemySelected = enemy.getShipList()[e.currentTarget.num];
+				/*for(var i:int = 0;i<enemy.getShipList().length;i++){
+					s = enemy.getShipList()[i];
 					if(e.currentTarget == s.getMC()){
 						enemySelected = s;
 						
@@ -240,12 +245,12 @@
 			targetingReticle.alpha = 1;
 			targetingReticle.x = e.currentTarget.x;
 			targetingReticle.y = e.currentTarget.y;
-			var s:Ship = playerShips[e.currentTarget.num];
+			var s:Ship = player.getShipList()[e.currentTarget.num];
 			s.getMC().filters = [VoyageFunctions.skillGlow(0x0000FF,15)];
 			s.selected = true;
 		}
 		public function rolloutPlayerShip(e:MouseEvent){
-			var s:Ship = playerShips[e.currentTarget.num];
+			var s:Ship = player.getShipList()[e.currentTarget.num];
 			s.getMC().filters = null;
 			s.selected = false
 		}
@@ -254,12 +259,12 @@
 			targetingReticle.alpha = 1;
 			targetingReticle.x = e.currentTarget.x;
 			targetingReticle.y = e.currentTarget.y;
-			var s:Ship = enemyShips[e.currentTarget.num];
+			var s:Ship = enemy.getShipList()[e.currentTarget.num];
 			s.getMC().filters = [VoyageFunctions.skillGlow(0xFF0000,15)];
 			s.selected = true;
 		}
 		public function rolloutEnemyShip(e:MouseEvent){
-			var s:Ship = enemyShips[e.currentTarget.num];
+			var s:Ship = enemy.getShipList()[e.currentTarget.num];
 			s.getMC().filters = null;
 			s.selected = false;
 		}
@@ -267,7 +272,7 @@
 		public function updateUI(){
 			var s:Ship;
 			if(activeShip > -1){
-				s = playerShips[activeShip];
+				s = player.getShipList()[activeShip];
 				activeShipReticle.x = s.getPos().x;
 				activeShipReticle.y = s.getPos().y;
 				activeShipReticle.filters = [VoyageFunctions.skillGlow(0x3AD4E2,9)];
@@ -298,14 +303,13 @@
 		public function drawShipCombatBar(){
 			trace("drawing combat bar");
 			var i:int;
-			var s:Ship = playerShips[activeShip];
-			var currShipDisplay:TextField = VoyageFunctions.createCustomTextField(40, 600, 220, 350);
-			currShipDisplay.text = " Ship " + " ||| hp: "+s.getCurrHealth()+"/"+s.getBaseHealth()+"\n";
-			activeShipUI.addChild(currShipDisplay);
-			//draw skill icons
+			var s:Ship = player.getShipList()[activeShip];
 			var pos = new Point(280, 675);
+			var hpbarpos = new Point(95, 600);
+			var hpbar:MovieClip = VoyageFunctions.createHPBar(hpbarpos, 40, 130, s.getCurrHealth(), s.getBaseHealth());
+			activeShipUI.addChild(hpbar);
+			//draw skill icons
 			skillButtonFunctions = new Array(s.getWeaponList().length);
-	
 			for(i=0;i<s.getWeaponList().length;i++){
 				var newpos:Point = new Point((pos.x + i*195), pos.y);
 				var w:Weapon = s.getWeaponList()[i];
@@ -333,7 +337,7 @@
 			}
 		}
 		public function selectSkill(e:MouseEvent):void{//num:int
-			var w:Weapon = playerShips[activeShip].getWeaponList()[e.currentTarget.num];
+			var w:Weapon = player.getShipList()[activeShip].getWeaponList()[e.currentTarget.num];
 			if(w.isUseable()){
 				trace("- selected skill "+ e.currentTarget.num);
 				switchToSkill(e.currentTarget.num);
@@ -342,7 +346,7 @@
 			}
 		}
 		public function switchToSkill(num:int):void{
-			var s:Ship = playerShips[activeShip];
+			var s:Ship = player.getShipList()[activeShip];
 			var w:Weapon = s.getWeaponList()[num];
 			if(w.isUseable()){
 				s.setCurrentWeaponNum(num);
@@ -357,30 +361,30 @@
 			if(debugUI != null){
 				Main.stage.removeChild(debugUI);
 			}
-			playerSelections = new Vector.<int>(playerShips.length);
+			playerSelections = new Vector.<int>(player.getShipList().length);
 			debugUI = new MovieClip();
 			var s:Ship;
 			var i:int;
 			//basic debug text
 			//--player
-			var playerHealthDisplay:TextField = VoyageFunctions.createCustomTextField(50, 10, 220, 350);
+			/*var playerHealthDisplay:TextField = VoyageFunctions.createCustomTextField(50, 10, 220, 350);
 			playerHealthDisplay.text = "";
 			
-			for(i = 0;i<playerShips.length;i++){
-				s = playerShips[i];
+			for(i = 0;i<player.getShipList().length;i++){
+				s = player.getShipList()[i];
 				playerHealthDisplay.text = playerHealthDisplay.text + " Ship "+i+ " ||| hp: "+s.getCurrHealth()+"/"+s.getBaseHealth()+"\n";
 			}
 			//--enemy
 			var enemyHealthDisplay:TextField = VoyageFunctions.createCustomTextField(950, 10, 220, 350);
 			enemyHealthDisplay.text = "";
 			
-			for(i = 0;i<enemyShips.length;i++){
-				s = enemyShips[i];
+			for(i = 0;i<enemy.getShipList().length;i++){
+				s = enemy.getShipList()[i];
 				enemyHealthDisplay.text = enemyHealthDisplay.text + " Ship "+i+ " ||| hp: "+s.getCurrHealth()+"/"+s.getBaseHealth()+"\n";
 			}
 			
 			debugUI.addChild(playerHealthDisplay);
-			debugUI.addChild(enemyHealthDisplay);
+			debugUI.addChild(enemyHealthDisplay);*/
 			Main.stage.addChild(debugUI);
 			//active ship selector
 			targetingReticle.alpha = 0;
@@ -390,17 +394,17 @@
 		//getters
 		public function nextActiveShip(){
 			activeShip ++;
-			if(activeShip >= playerShips.length){
+			if(activeShip >= player.getShipList().length){
 				activeShip = 0;
 			}
-			if(!playerShips[activeShip].isActive()){
+			if(!player.getShipList()[activeShip].isActive()){
 				nextActiveShip();
 			}
 		}
 		//--checks if all ships have made their target and can fire
 		public function allShipsReady():Boolean{
-			for(var i=0;i<playerShips.length;i++){
-				var s:Ship = playerShips[i];
+			for(var i=0;i<player.getShipList().length;i++){
+				var s:Ship = player.getShipList()[i];
 				if(!s.isActive() && s.hasTarget()){
 					
 				}else{

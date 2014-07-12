@@ -2,13 +2,36 @@
 	import flash.text.*;
 	import flash.filters.*;
 	import fl.motion.Color;
-	import flash.geom.Point;
-	import flash.display.MovieClip;
+	import flash.geom.*;
+	import flash.display.*;
 
 	public class VoyageFunctions {
 		
 		public function VoyageFunctions() {
 			// constructor code
+		}
+		public static function createHPBar(pos:Point, w:Number, h:Number, currHP:Number, maxHP:Number):MovieClip{
+			var hpbar:MovieClip = new MovieClip();//main movieclip
+			var hpPercent:Number = currHP/maxHP;
+			
+			var maxhpbar:Sprite = new Sprite();
+			maxhpbar.graphics.beginFill(0x666666, 1);
+			maxhpbar.graphics.drawRect(pos.x, pos.y, w, h);
+			maxhpbar.graphics.endFill();
+			
+			var currhpbar:Sprite = new Sprite();//graphics
+			currhpbar.graphics.beginFill(0x61C995, 1);
+			var yOffset:Number = h*(1-hpPercent);
+			currhpbar.graphics.drawRect(pos.x, pos.y+yOffset, w, h*hpPercent);
+			currhpbar.graphics.endFill();
+			
+			var currShipDisplay:TextField = VoyageFunctions.createCustomTextField(pos.x, pos.y, 220, 350);//text
+			currShipDisplay.text = currHP+"/"+maxHP+"\n";// Ship " + " ||| "hp: "+
+			
+			hpbar.addChild(maxhpbar);
+			hpbar.addChild(currhpbar);
+			hpbar.addChild(currShipDisplay);
+			return hpbar;
 		}
 		public static function createHitBox(pos:Point, w:Number, h:Number, n:Number):MovieClip{
 			var hb:MovieClip = new hitbox();

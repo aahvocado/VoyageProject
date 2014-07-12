@@ -9,60 +9,55 @@
 	import flash.display3D.IndexBuffer3D;
 
 	public class Main extends MovieClip{
-		var mode = "combat";//current mode
+		var mode = "combat";//current mode (state machine)
 		public static var stage:Stage;
 		public static var debug:Boolean = false;
 
 		//
-		var playerShips:Vector.<Ship> = new Vector.<Ship>();
-		var enemyShips:Vector.<Ship> = new Vector.<Ship>();
-		//
+		var player:Player = new Player();
+		var enemy:Player = new Player();
+		//state machine stuffs
 		var combatScript:Combat;
-		//testy stuff
-		var playerShipCountTest = 4;
+		var mapScript:MapScene;
 		//main constructor
 		public function Main(){
 			Main.stage = stage;
 			//add listeners
 			stage.scaleMode = StageScaleMode.SHOW_ALL;
 			stage.addEventListener(Event.ENTER_FRAME, main_loop);
-			
-			initTest();			
-		}
-		public function initTest(){
-			var i:int;
-			//test
-			for(i=0;i<playerShipCountTest;i++){
-				createSmallShip("player");
-			}
-			createSmallShip("enemy");
-			
-			//less test
-			var s:Ship;
-			for(i=0;i<playerShips.length;i++){
-				s = playerShips[i];
-				addChild(s.getMC());
-			}
-
+			initTest();	
 			//
-			for(i=0;i<enemyShips.length;i++){
-				s = enemyShips[i];
-				s.getMC().scaleX *= -1;
-				addChild(s.getMC());
-			}
-			initInterface();
-			//set up combat
-			combatScript = new Combat(stage, playerShips, enemyShips);
+			gotoAndStop(1,"Combat");
 		}
-		
-		//constant loop
+		public function checkLoop(){
+			
+		}
+				//constant loop
 		function main_loop(e:Event):void {//main loop
 			switch(mode){
 				case "combat":
 					combatScript.update();
 					break;
-			}			
+				case "map":
+					mapScript.update();
+					break;
+			}	
 		}
+		public function initTest(){
+			var i:int;
+			var ps:Ship;
+			var es:Ship;
+			//test
+			ps = player.addShip("test", "small", 5, "player");
+			es = enemy.addShip("enemy", "small", 5, "enemy");
+			
+			combatScript = new Combat(stage, player, enemy);
+			mapScript = new MapScene();
+			initInterface();
+			
+		}
+		
+
 		//aaa
 		//public static function addProjectile():Projectile{
 			
@@ -73,25 +68,6 @@
 			shipSymb.x = 90;
 			shipSymb.y = 525;
 			addChild(shipSymb);
-		}
-		//creates a small ship for testing right now
-		public function createSmallShip(group:String):Ship{
-			var s:Ship;
-			switch(group){
-				case "player":
-					s = new Ship(new testSpaceship_1(), new Point(225+VoyageFunctions.randomRange(-50,50),225+VoyageFunctions.randomRange(-150,150)), 5);
-					playerShips.push(s);
-					break;
-				case "enemy":
-					s = new Ship(new testESpaceship_1(), new Point(925+VoyageFunctions.randomRange(-50,50),225+VoyageFunctions.randomRange(-150,150)), 3);
-					enemyShips.push(s);
-					break;
-			}
-			
-			s.setVel(new Point(0,0));
-			s.reset();
-			trace("made "+group+" ship");
-			return s;
 		}
 	}
 }

@@ -5,6 +5,7 @@
 	
 	public class Ship {
 		//data
+		var Name:String;
 		var pos:Point;
 		var mc:MovieClip;//movieclip parent
 		var size:Number;//size of ship, this determines z position
@@ -26,10 +27,10 @@
 		//var currWeapon:Weapon;
 		var currWeaponNum:int;
 		
-		public function Ship(mcParam:MovieClip, posParam:Point, baseHealthParam:Number) {
+		public function Ship(Name:String, mcParam:MovieClip, baseHealthParam:Number) {//posParam:Point, 
 			velocity = new Point(0,0);
+			this.Name = Name;
 			mc = mcParam;
-			pos = posParam;
 			baseHealth = baseHealthParam;
 			reset();
 			currWeaponNum = 0;
