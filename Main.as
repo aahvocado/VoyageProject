@@ -27,12 +27,9 @@
 			stage.addEventListener(Event.ENTER_FRAME, main_loop);
 			initTest();	
 			//
-			gotoAndStop(1,"Combat");
+			switchToMode("map");
 		}
-		public function checkLoop(){
-			
-		}
-				//constant loop
+		//constant loop
 		function main_loop(e:Event):void {//main loop
 			switch(mode){
 				case "combat":
@@ -42,6 +39,19 @@
 					mapScript.update();
 					break;
 			}	
+		}
+		public function switchToMode(m:String){
+			switch(m){
+				case "combat":
+					gotoAndStop(1,"Combat");
+					combatScript.initMode();
+					break;
+				case "map":
+					gotoAndStop(1,"Map");
+					mapScript.initMode();
+					break;
+			}	
+			mode = m;
 		}
 		public function initTest(){
 			var i:int;
@@ -56,12 +66,7 @@
 			initInterface();
 			
 		}
-		
 
-		//aaa
-		//public static function addProjectile():Projectile{
-			
-		//}
 		//interface
 		public function initInterface(){
 			var shipSymb = new test_ship_symbol();

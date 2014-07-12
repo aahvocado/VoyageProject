@@ -31,24 +31,27 @@
 		
 		var enemySelected:Ship = null;
 		//constructor
-		public function Combat(stageThing, playerGroup:Player, enemyGroup:Player) {
+		public function Combat(stageThing, playerGroup:Player, enemyGroup:Player):void {
 			Main.stage = stageThing;//main stage
 			player = playerGroup;
 			enemy = enemyGroup;
 			combatMode = "player selection";
-			//
+		}
+		public function initMode():void{
 			initUI();
 			addListeners();
-			//
 			if(player.getShipList().length > 0){
 				activeShip = 0;
 			}
-
 			switchToShip(activeShip);
+		}
+		
+		public function endMode():void{
+			
 		}
 		//add event listener button hitboxes
 		//-- temporarily add ships to the stage here too
-		public function addListeners(){
+		public function addListeners():void{
 			var s:Ship;
 			var i:int;
 			var hb:MovieClip;//hitbox that the player clicks on 
@@ -77,7 +80,7 @@
 			}
 		}
 		//called by main to constantly update this
-		public function update(){
+		public function update():void{
 			switch (combatMode){
 				case "player selection":
 					animationUpdate();
@@ -114,7 +117,7 @@
 			
 		}
 		//after player is done and all targets are made
-		public function resolveTurn(){
+		public function resolveTurn():void{
 			trace("resolving turn");
 			combatPause = defaultCombatPause;
 			var s:Ship;
@@ -189,7 +192,7 @@
 
 		}
 		//player's turn where they select their weapons and targets
-		public function playerSelecting(){
+		public function playerSelecting():void{
 			var s:Ship;
 			//check for targeting
 			s = player.getShipList()[activeShip];
@@ -213,7 +216,7 @@
 			}
 		}
 		//weird ai to select targets for the enemy
-		public function enemySelecting(){
+		public function enemySelecting():void{
 			for(var i = 0;i<enemy.getShipList().length;i++){
 				var s:Ship = enemy.getShipList()[i];
 				if(!s.hasTarget()){
