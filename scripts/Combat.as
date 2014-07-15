@@ -28,7 +28,7 @@
 		var activeShip:int = -1;
 		
 		var combatPause:int = 0;
-		var defaultCombatPause:int = 20;
+		var defaultCombatPause:int = 30;
 		
 		var enemySelected:Ship = null;
 		//constructor
@@ -158,7 +158,9 @@
 				s.update();
 			}
 			//
-			checkShipStatuses();
+			if(combatPause <= 0){
+				checkShipStatuses();
+			}
 			updateUI();
 		}
 		//after player is done and all targets are made
@@ -274,16 +276,13 @@
 		public function checkShipStatuses():void{
 			var i:int;
 			var s:Ship;
-			/*for(i = 0;i<enemy.getShipList().length;i++){
-				s = enemy.getShipList()[i];
-				if(!s.isAlive()){
-					
-				}
-			}*/
+			if(isPlayersDead()){
+				endMode();
+				Main.switchMode = "map";
+			}
 			if(isEnemiesDead()){
 				endMode();
 				Main.switchMode = "map";
-				
 			}
 		}
 		//select an enemy ship
@@ -452,6 +451,15 @@
 			//Main.stage.addChild(targetingReticle);
 		}
 		//getters
+		public function isPlayersDead():Boolean{
+			for(var i=0;i<player.getShipList().length;i++){
+				var s:Ship = player.getShipList()[i];
+				if(s.isAlive()){
+					return false;
+				}
+			}
+			return true;
+		}
 		public function isEnemiesDead():Boolean{
 			for(var i=0;i<enemy.getShipList().length;i++){
 				var s:Ship = enemy.getShipList()[i];
