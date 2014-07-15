@@ -20,10 +20,9 @@
 
 		var effectsList:Array = new Array();
 		var listenerHitboxList:Vector.<MovieClip> = null;
-
+		var objectsAndEffectsList:Vector.<MovieClip>;
 		//
 		var activeShipUI:MovieClip;//ship ui holder movieclip
-		var skillButtonFunctions:Array;//holds the function for the current skill buttons
 		var targetingReticle:MovieClip = new TargetingReticle_1();//targeting reticle movieclip
 		var activeShipReticle:SelectionReticle_1 = new SelectionReticle_1();
 		var activeShip:int = -1;
@@ -35,27 +34,30 @@
 		//constructor
 		public function Combat(playerGroup:Player, enemyGroup:Player):void {
 			//Main.stage = stageThing;//main stage
-			trace("enemy has "+enemyGroup.getShipList().length + " ship(s)");
 			player = playerGroup;
 			enemy = enemyGroup;
 			combatMode = "player selection";
 		}
 		public function initMode():void{
+			trace("enemy has "+enemy.getShipList().length + " ship(s)");
 			initUI();
+			listenerHitboxList = new Vector.<MovieClip>()
+			objectsAndEffectsList = new Vector.<MovieClip>()
 			Main.stage.addChild(activeShipReticle);
-
+			drawShips();
 			addListeners();
 			if(player.getShipList().length > 0){
 				activeShip = 0;
 			}
 			switchToShip(activeShip);
 			trace("- done initializing combat");
-
 		}
 		
 		public function endMode():void{
+			removeShips();
 			removeListeners();
-			Main.stage.removeChild(targetingReticle);
+			Main.stage.removeChild(activeShipUI);
+			Main.stage.removeChild(activeShipReticle);
 		}
 		//add event listener button hitboxes
 		//-- temporarily add ships to the stage here too
@@ -63,52 +65,64 @@
 			var s:Ship;
 			var i:int;
 			var hb:MovieClip;//hitbox that the player clicks on 
-			if(listenerHitboxList != null){
-				removeListeners();
-			}
 			//make player clickable
 			for(i = 0;i<player.getShipList().length;i++){
 				s = player.getShipList()[i];
-				Main.stage.addChild(s.getMC());
-
-				s.setCombatNum(i);
 				hb = VoyageFunctions.createHitBox(s.getPos(), s.getMC().width, s.getMC().height, i);
 				Main.stage.addChild(hb);
 				hb.addEventListener(MouseEvent.CLICK, selectPlayerShip);
 				hb.addEventListener(MouseEvent.MOUSE_OVER, rolloverPlayerShip);
 				hb.addEventListener(MouseEvent.MOUSE_OUT, rolloutPlayerShip);
+				listenerHitboxList.push(hb);
+			}
+			//check enemies
+			for(i = 0;i<enemy.getShipList().length;i++){
+				s = enemy.getShipList()[i];
+				hb = VoyageFunctions.createHitBox(s.getPos(), s.getMC().width, s.getMC().height, i);
+				Main.stage.addChild(hb);
+				hb.addEventListener(MouseEvent.CLICK, selectEnemyShip);
+				hb.addEventListener(MouseEvent.MOUSE_OVER, rolloverEnemyShip);
+				hb.addEventListener(MouseEvent.MOUSE_OUT, rolloutEnemyShip);
+				listenerHitboxList.push(hb);
+			}
+		}
+		public function removeListeners():void{
+			//remove hitbox listeners
+			for(var i=0;i<listenerHitboxList.length;i++){
+				Main.stage.removeChild(listenerHitboxList[i]);
+			}
+			listenerHitboxList = new Vector.<MovieClip>();
+		}
+		public function drawShips(){
+			var s:Ship;
+			var i:int;
+			//make player clickable
+			for(i = 0;i<player.getShipList().length;i++){
+				s = player.getShipList()[i];
+				Main.stage.addChild(s.getMC());
+				s.setCombatNum(i);
 			}
 			//check enemies
 			for(i = 0;i<enemy.getShipList().length;i++){
 				s = enemy.getShipList()[i];
 				Main.stage.addChild(s.getMC());
 				s.setCombatNum(i);
-				hb = VoyageFunctions.createHitBox(s.getPos(), s.getMC().width, s.getMC().height, i);
-				Main.stage.addChild(hb);
-				hb.addEventListener(MouseEvent.CLICK, selectEnemyShip);
-				hb.addEventListener(MouseEvent.MOUSE_OVER, rolloverEnemyShip);
-				hb.addEventListener(MouseEvent.MOUSE_OUT, rolloutEnemyShip);
 			}
 		}
-		public function removeListeners():void{
+		public function removeShips(){
 			var s:Ship;
 			var i:int;
-			var hb:MovieClip;//hitbox that the player clicks on 
 			//removePlayers
 			for(i = 0;i<player.getShipList().length;i++){
 				s = player.getShipList()[i];
 				Main.stage.removeChild(s.getMC());
 			}
+
 			//removeEnemies
 			for(i = 0;i<enemy.getShipList().length;i++){
 				s = enemy.getShipList()[i];
 				Main.stage.removeChild(s.getMC());
 			}
-			//remove hitbox listeners
-			for(i=0;i<listenerHitboxList.length;i++){
-				Main.stage.removeChild(listenerHitboxList[i]);
-			}
-			listenerHitboxList = null;
 		}
 		//called by main to constantly update this
 		public function update():void{
@@ -260,19 +274,27 @@
 		public function checkShipStatuses():void{
 			var i:int;
 			var s:Ship;
-			for(i = 0;i<enemy.getShipList().length;i++){
+			/*for(i = 0;i<enemy.getShipList().length;i++){
 				s = enemy.getShipList()[i];
 				if(!s.isAlive()){
 					
 				}
+			}*/
+			if(isEnemiesDead()){
+				endMode();
+				Main.switchMode = "map";
+				
 			}
 		}
 		//select an enemy ship
 		public function selectEnemyShip(e:MouseEvent):void{
 			var s:Ship;
 			if(combatMode == "player selection"){
-				trace("- targeted enemy ");
-				enemySelected = enemy.getShipList()[e.currentTarget.num];
+				s = enemy.getShipList()[e.currentTarget.num];
+				if(s.isAlive()){
+					trace("- targeted enemy ");
+					enemySelected = s;
+				}
 			}
 			//return null;
 		}
@@ -292,17 +314,21 @@
 		}
 		//mouse events on enemy ship
 		public function rolloverEnemyShip(e:MouseEvent){
-			targetingReticle.alpha = 1;
-			targetingReticle.x = e.currentTarget.x;
-			targetingReticle.y = e.currentTarget.y;
 			var s:Ship = enemy.getShipList()[e.currentTarget.num];
-			s.getMC().filters = [VoyageFunctions.skillGlow(0xFF0000,15)];
-			s.selected = true;
+			if(s.isAlive()){
+				targetingReticle.alpha = 1;
+				targetingReticle.x = e.currentTarget.x;
+				targetingReticle.y = e.currentTarget.y;
+				s.getMC().filters = [VoyageFunctions.skillGlow(0xFF0000,15)];
+				s.selected = true;
+			}
 		}
 		public function rolloutEnemyShip(e:MouseEvent){
 			var s:Ship = enemy.getShipList()[e.currentTarget.num];
-			s.getMC().filters = null;
-			s.selected = false;
+			if(s.isAlive()){
+				s.getMC().filters = null;
+				s.selected = false;
+			}
 		}
 		//constant checking of certain ui elements
 		public function updateUI(){
@@ -345,7 +371,6 @@
 			var hpbar:MovieClip = VoyageFunctions.createHPBar(hpbarpos, 40, 130, s.getCurrHealth(), s.getBaseHealth());
 			activeShipUI.addChild(hpbar);
 			//draw skill icons
-			skillButtonFunctions = new Array(s.getWeaponList().length);
 			for(i=0;i<s.getWeaponList().length;i++){
 				var newpos:Point = new Point((pos.x + i*195), pos.y);
 				var w:Weapon = s.getWeaponList()[i];
@@ -430,7 +455,7 @@
 		public function isEnemiesDead():Boolean{
 			for(var i=0;i<enemy.getShipList().length;i++){
 				var s:Ship = enemy.getShipList()[i];
-				if(!s.isAlive()){
+				if(s.isAlive()){
 					return false;
 				}
 			}

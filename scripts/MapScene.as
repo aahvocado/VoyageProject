@@ -49,9 +49,6 @@
 			}
 		}
 		public function addListeners():void{
-			if(listenerHitboxList != null){
-				removeListeners();
-			}
 			var ms:MapSpace;
 			var hb:MovieClip;//hitbox that the player clicks on 
 			for(var i=0;i<spaceList.length;i++){
@@ -73,7 +70,6 @@
 		public function initSpace():void{
 			var TESTNUMBER:int = 5;
 			var ms:MapSpace;
-			listenerHitboxList = new Vector.<MovieClip>;
 			if(spaceList == null){
 				spaceList = new Vector.<MapSpace>();
 			}
@@ -81,6 +77,7 @@
 				ms = new MapSpace();
 				spaceList.push(ms);
 			}
+			trace("- finished initializing space");
 		}
 		//mouse events on planet
 		public function rolloverSpace(e:MouseEvent){
@@ -93,6 +90,7 @@
 		}
 		//called when the scene switches this mode
 		public function initMode():void{
+			listenerHitboxList = new Vector.<MovieClip>;
 			drawSpace();
 			addListeners();
 			Main.stage.addChild(travelShip);

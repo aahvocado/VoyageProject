@@ -15,17 +15,17 @@
 				case "laser beam":
 					baseCooldown = 0;
 					basePower = 1;
-					shots = 3;
+					shots = 1;
 					break;
 				case "laser beam II":
 					baseCooldown = 1;
 					basePower = 2;
-					shots = 4;
+					shots = 2;
 					break;
 				case "laser beam III":
 					baseCooldown = 2;
 					basePower = 3;
-					shots = 5;
+					shots = 3;
 					break;
 			}
 		}
