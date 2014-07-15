@@ -19,6 +19,8 @@
 		var playerSelections:Vector.<int> = new Vector.<int>();
 
 		var effectsList:Array = new Array();
+		var listenerHitboxList:Vector.<MovieClip> = null;
+
 		//
 		var activeShipUI:MovieClip;//ship ui holder movieclip
 		var skillButtonFunctions:Array;//holds the function for the current skill buttons
@@ -31,23 +33,29 @@
 		
 		var enemySelected:Ship = null;
 		//constructor
-		public function Combat(stageThing, playerGroup:Player, enemyGroup:Player):void {
-			Main.stage = stageThing;//main stage
+		public function Combat(playerGroup:Player, enemyGroup:Player):void {
+			//Main.stage = stageThing;//main stage
+			trace("enemy has "+enemyGroup.getShipList().length + " ship(s)");
 			player = playerGroup;
 			enemy = enemyGroup;
 			combatMode = "player selection";
 		}
 		public function initMode():void{
 			initUI();
+			Main.stage.addChild(activeShipReticle);
+
 			addListeners();
 			if(player.getShipList().length > 0){
 				activeShip = 0;
 			}
 			switchToShip(activeShip);
+			trace("- done initializing combat");
+
 		}
 		
 		public function endMode():void{
-			
+			removeListeners();
+			Main.stage.removeChild(targetingReticle);
 		}
 		//add event listener button hitboxes
 		//-- temporarily add ships to the stage here too
@@ -55,6 +63,9 @@
 			var s:Ship;
 			var i:int;
 			var hb:MovieClip;//hitbox that the player clicks on 
+			if(listenerHitboxList != null){
+				removeListeners();
+			}
 			//make player clickable
 			for(i = 0;i<player.getShipList().length;i++){
 				s = player.getShipList()[i];
@@ -78,6 +89,26 @@
 				hb.addEventListener(MouseEvent.MOUSE_OVER, rolloverEnemyShip);
 				hb.addEventListener(MouseEvent.MOUSE_OUT, rolloutEnemyShip);
 			}
+		}
+		public function removeListeners():void{
+			var s:Ship;
+			var i:int;
+			var hb:MovieClip;//hitbox that the player clicks on 
+			//removePlayers
+			for(i = 0;i<player.getShipList().length;i++){
+				s = player.getShipList()[i];
+				Main.stage.removeChild(s.getMC());
+			}
+			//removeEnemies
+			for(i = 0;i<enemy.getShipList().length;i++){
+				s = enemy.getShipList()[i];
+				Main.stage.removeChild(s.getMC());
+			}
+			//remove hitbox listeners
+			for(i=0;i<listenerHitboxList.length;i++){
+				Main.stage.removeChild(listenerHitboxList[i]);
+			}
+			listenerHitboxList = null;
 		}
 		//called by main to constantly update this
 		public function update():void{
@@ -113,8 +144,8 @@
 				s.update();
 			}
 			//
+			checkShipStatuses();
 			updateUI();
-			
 		}
 		//after player is done and all targets are made
 		public function resolveTurn():void{
@@ -225,21 +256,23 @@
 				}
 			}
 		}
-
+		//
+		public function checkShipStatuses():void{
+			var i:int;
+			var s:Ship;
+			for(i = 0;i<enemy.getShipList().length;i++){
+				s = enemy.getShipList()[i];
+				if(!s.isAlive()){
+					
+				}
+			}
+		}
 		//select an enemy ship
 		public function selectEnemyShip(e:MouseEvent):void{
 			var s:Ship;
 			if(combatMode == "player selection"){
 				trace("- targeted enemy ");
 				enemySelected = enemy.getShipList()[e.currentTarget.num];
-				/*for(var i:int = 0;i<enemy.getShipList().length;i++){
-					s = enemy.getShipList()[i];
-					if(e.currentTarget == s.getMC()){
-						enemySelected = s;
-						
-						//return s;
-					}
-				}*/
 			}
 			//return null;
 		}
@@ -392,10 +425,18 @@
 			//active ship selector
 			targetingReticle.alpha = 0;
 			//Main.stage.addChild(targetingReticle);
-			Main.stage.addChild(activeShipReticle);
 		}
 		//getters
-		public function nextActiveShip(){
+		public function isEnemiesDead():Boolean{
+			for(var i=0;i<enemy.getShipList().length;i++){
+				var s:Ship = enemy.getShipList()[i];
+				if(!s.isAlive()){
+					return false;
+				}
+			}
+			return true;
+		}
+		public function nextActiveShip():void{
 			activeShip ++;
 			if(activeShip >= player.getShipList().length){
 				activeShip = 0;

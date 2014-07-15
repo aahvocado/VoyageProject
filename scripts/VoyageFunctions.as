@@ -10,6 +10,17 @@
 		public function VoyageFunctions() {
 			// constructor code
 		}
+		//takes in a percent chance and rolls to determine if it hit within that range
+		public static function percentChance(pc:Number):Boolean{
+			var n:Number = Math.random()*100;
+			//trace(pc+"/"+n);
+			if(pc>=n){
+				return true;
+			}
+			return false;
+			
+		}
+		//creates a vertical hp bar
 		public static function createHPBar(pos:Point, w:Number, h:Number, currHP:Number, maxHP:Number):MovieClip{
 			var hpbar:MovieClip = new MovieClip();//main movieclip
 			var hpPercent:Number = currHP/maxHP;
@@ -33,6 +44,7 @@
 			hpbar.addChild(currShipDisplay);
 			return hpbar;
 		}
+		//creates a hitbox which contains a number, typically used to match the id with ship number
 		public static function createHitBox(pos:Point, w:Number, h:Number, n:Number):MovieClip{
 			var hb:MovieClip = new hitbox();
 			hb.x = pos.x;

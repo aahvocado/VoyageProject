@@ -6,7 +6,10 @@
 	public class MapScene {
 		var travelShip:MovieClip;
 		var travelPos:Point;
-		var spaceList:Vector.<MapSpace> = new Vector.<MapSpace>();
+		var listenerHitboxList:Vector.<MovieClip> = null;
+
+		var spaceList:Vector.<MapSpace> = null;
+		var selectedSpace:int;//number in spaceList that was selected
 		
 		public function MapScene() {
 			resetPlayerShip();
@@ -14,18 +17,21 @@
 			initSpace();
 		}
 		
-
-		public function initSpace():void{
-			var TESTNUMBER:int = 5;
-			var ms:MapSpace;
-			for(var i=0;i<TESTNUMBER;i++){
-				ms = new MapSpace();
-				spaceList.push(ms);
-			}
+		//update if on the mode
+		public function update():void{
+			travelShip.x = travelPos.x;
+			travelShip.y = travelPos.y;
 		}
+
 		public function selectSpace(e:Event):void{
 			var spaceNum = e.currentTarget.num;
-			
+			var space:MapSpace = spaceList[spaceNum];
+			selectedSpace = spaceNum;
+			if(space.hasEnemy()){
+				endMode();
+				Main.switchMode = "combat";
+				//Main.switchToMode("combat");
+			}
 		}
 		//addchild on to the stage
 		public function drawSpace():void{
@@ -35,7 +41,17 @@
 				Main.stage.addChild(ms.getMC());
 			}
 		}
+		public function removeSpace():void{
+			var ms:MapSpace;
+			for(var i=0;i<spaceList.length;i++){
+				ms = spaceList[i];
+				Main.stage.removeChild(ms.getMC());
+			}
+		}
 		public function addListeners():void{
+			if(listenerHitboxList != null){
+				removeListeners();
+			}
 			var ms:MapSpace;
 			var hb:MovieClip;//hitbox that the player clicks on 
 			for(var i=0;i<spaceList.length;i++){
@@ -45,12 +61,26 @@
 				hb.addEventListener(MouseEvent.CLICK, selectSpace);
 				hb.addEventListener(MouseEvent.MOUSE_OVER, rolloverSpace);
 				hb.addEventListener(MouseEvent.MOUSE_OUT, rolloutSpace);
+				listenerHitboxList.push(hb);
 			}
 		}
-		//update if on the mode
-		public function update():void{
-			travelShip.x = travelPos.x;
-			travelShip.y = travelPos.y;
+		public function removeListeners():void{
+			for(var i=0;i<listenerHitboxList.length;i++){
+				Main.stage.removeChild(listenerHitboxList[i]);
+			}
+		}
+		//called when constructor is made
+		public function initSpace():void{
+			var TESTNUMBER:int = 5;
+			var ms:MapSpace;
+			listenerHitboxList = new Vector.<MovieClip>;
+			if(spaceList == null){
+				spaceList = new Vector.<MapSpace>();
+			}
+			for(var i=0;i<TESTNUMBER;i++){
+				ms = new MapSpace();
+				spaceList.push(ms);
+			}
 		}
 		//mouse events on planet
 		public function rolloverSpace(e:MouseEvent){
@@ -68,12 +98,16 @@
 			Main.stage.addChild(travelShip);
 		}
 		public function endMode():void{
-			//removeListeners();_
+			removeSpace();
+			removeListeners();
 			Main.stage.removeChild(travelShip);
 		}
 		public function resetPlayerShip():void{
 			travelShip = new playerShip();
 			travelPos = new Point(Main.stage.stageWidth/2,Main.stage.stageHeight/2);
+		}
+		public function getEnemy():Player{
+			return spaceList[selectedSpace].getEnemy();
 		}
 		
 	}

@@ -36,15 +36,22 @@
 			currWeaponNum = 0;
 		}
 		public function update(){
+			//
 			pos.x += velocity.x;
 			pos.y += velocity.y;
-			
+			//
 			mc.x = pos.x;
 			mc.y = pos.y;
+			//
 			if(hasTarget() && !selected){
 				mc.filters = [VoyageFunctions.skillGlow(0x00FF00,7)];
 			}else if(!hasTarget() && !selected){
 				mc.filters = null;
+			}
+			//
+			if(!isAlive()){
+				this.velocity = new Point(-2, 15);
+				this.mc.rotation -= 1;
 			}
 		}
 		//execute this ship's turn
@@ -103,6 +110,12 @@
 		}
 		public function hasTarget():Boolean{
 			if(target != null){
+				return true;
+			}
+			return false;
+		}
+		public function isAlive():Boolean{
+			if(currHealth > 0){
 				return true;
 			}
 			return false;

@@ -12,7 +12,7 @@
 		var mode = "combat";//current mode (state machine)
 		public static var stage:Stage;
 		public static var debug:Boolean = false;
-
+		public static var switchMode:String = null;
 		//
 		var player:Player = new Player();
 		var enemy:Player = new Player();
@@ -31,6 +31,10 @@
 		}
 		//constant loop
 		function main_loop(e:Event):void {//main loop
+			if(switchMode != null){
+				switchToMode(switchMode);
+				switchMode = null;
+			}
 			switch(mode){
 				case "combat":
 					combatScript.update();
@@ -44,6 +48,8 @@
 			switch(m){
 				case "combat":
 					gotoAndStop(1,"Combat");
+					enemy = mapScript.getEnemy();
+					combatScript = new Combat(player, enemy);
 					combatScript.initMode();
 					break;
 				case "map":
@@ -61,7 +67,7 @@
 			ps = player.addShip("test", "small", 5, "player");
 			es = enemy.addShip("enemy", "small", 5, "enemy");
 			
-			combatScript = new Combat(stage, player, enemy);
+			combatScript = new Combat(player, enemy);
 			mapScript = new MapScene();
 			initInterface();
 			
